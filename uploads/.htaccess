@@ -1,0 +1,6 @@
+# Bloquea ejecución de scripts dentro de uploads/ (solo PDF e imágenes)
+<FilesMatch "\.(php|phtml|phar|cgi|pl|sh)$">
+  Require all denied
+</FilesMatch>
+php_flag engine off
+Options -ExecCGI -Indexes

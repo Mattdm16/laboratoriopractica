@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>UNACH · Gestión de Documentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400..600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20261018i" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-label">Acciones</div>
+
+    <nav class="side-nav">
+      <button type="button" class="nav-item active" data-view="documentos">
+        <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+        Documentos
+      </button>
+      <button type="button" class="nav-item" data-action="nuevo">
+        <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nuevo documento
+      </button>
+    </nav>
+
+    <hr class="side-divider" />
+    <div class="side-label side-label-sm">Recientes</div>
+    <div class="side-docs" id="sideDocList">
+      <p class="muted side-empty">Cargando…</p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="tb-ico">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+        </span>
+        <span id="topTitle">Gestión de Documentos</span>
+      </div>
+      <button type="button" class="pill-btn" data-action="nuevo">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nuevo
+      </button>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== VISTA: DOCUMENTOS ===== -->
+      <section id="view-documentos" class="view">
+        <p class="eyebrow">Listado</p>
+        <h1 class="display">Documentos</h1>
+        <p class="counts">
+          <span><span class="cdot c-rec"></span><strong id="stRec">0</strong> recibidos</span>
+          <span><span class="cdot c-proc"></span><strong id="stProc">0</strong> en proceso</span>
+          <span><span class="cdot c-ate"></span><strong id="stAte">0</strong> atendidos</span>
+        </p>
+
+        <div class="searchbar">
+          <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+          <input id="q" type="search" placeholder="Buscar en todos los campos: No. de oficio, asunto, remitente o destinatario…" autocomplete="off" />
+        </div>
+
+        <div class="toolbar">
+          <label class="chip">Estatus
+            <select id="fEstatus">
+              <option value="">Todos</option>
+              <option>Recibido</option>
+              <option>En proceso</option>
+              <option>Atendido</option>
+            </select>
+          </label>
+          <label class="chip">Desde <input type="date" id="fDesde" /></label>
+          <label class="chip">Hasta <input type="date" id="fHasta" /></label>
+        </div>
+
+        <!-- Tabla desktop -->
+        <div class="table-wrap">
+          <table id="docsTable">
+            <thead>
+              <tr>
+                <th>No. Oficio</th><th>Fecha</th><th>Asunto</th>
+                <th>Remitente</th><th>Destinatario</th><th>Estatus</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody><!-- render JS --></tbody>
+          </table>
+          <p class="table-foot" id="tableFoot">Cargando…</p>
+        </div>
+
+        <!-- Cards móvil -->
+        <div class="m-cards" id="mCards"><!-- render JS --></div>
+
+        <!-- Tarjeta vacía (estilo sugerencia) -->
+        <div class="hint-card" id="docEmpty" hidden>
+          <p class="hc-kicker"><span class="hc-dot"></span> Sin coincidencias</p>
+          <p class="hc-text">No hay documentos que coincidan con la búsqueda. Ajusta los filtros del listado o registra uno nuevo.</p>
+          <div class="hc-foot">
+            <span class="hint"><kbd>Busca</kbd> por folio, asunto, remitente o destinatario</span>
+            <button type="button" class="btn btn-primary" data-action="nuevo">＋ Nuevo documento</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VISTA: NUEVO DOCUMENTO ===== -->
+      <section id="view-nuevo" class="view" hidden>
+        <p class="eyebrow">Registro</p>
+        <h1 class="display">Nuevo documento</h1>
+        <p class="lead">Captura los datos del oficio, adjunta el archivo digitalizado (PDF, JPG o PNG · máx. 10&nbsp;MB) y verifica la subida.</p>
+
+        <div class="steps">
+          <div class="step on" data-step="1"><span class="n">1</span><span class="t">Datos del documento</span></div>
+          <div class="sline" data-line="1"></div>
+          <div class="step" data-step="2"><span class="n">2</span><span class="t">Archivo</span></div>
+          <div class="sline" data-line="2"></div>
+          <div class="step" data-step="3"><span class="n">3</span><span class="t">Verificación</span></div>
+          <div class="sline" data-line="3"></div>
+          <div class="step" data-step="4"><span class="n">4</span><span class="t">Confirmación</span></div>
+        </div>
+
+        <form id="formRegistro" enctype="multipart/form-data" novalidate>
+          <!-- PASO 1 -->
+          <div class="wstep" data-pane="1">
+            <div class="wgrid">
+              <label>No. de Oficio* <span class="max-hint">(máx. 16)</span><input name="no_oficio" required maxlength="16" placeholder="Ej. 001/2026" /><small class="field-err" hidden></small></label>
+              <label>Fecha* <span class="max-hint">(obligatoria)</span><input name="fecha" type="date" required /><small class="field-err" hidden></small></label>
+              <label class="full">Asunto* <span class="max-hint">(máx. 255)</span><input name="asunto" required maxlength="255" placeholder="Descripción breve del contenido" /><small class="field-err" hidden></small></label>
+              <label>Remitente* <span class="max-hint">(máx. 20)</span><input name="remitente" required maxlength="20" placeholder="Nombre o dependencia" /><small class="field-err" hidden></small></label>
+              <label>Destinatario* <span class="max-hint">(máx. 20)</span><input name="destinatario" required maxlength="20" placeholder="Nombre o área" /><small class="field-err" hidden></small></label>
+              <label class="full">Estatus* <span class="max-hint">(obligatorio)</span>
+                <select name="estatus" required>
+                  <option>Recibido</option>
+                  <option>En proceso</option>
+                  <option>Atendido</option>
+                </select>
+                <small class="field-err" hidden></small>
+              </label>
+            </div>
+            <div class="wcenter"><button type="button" class="btn btn-primary" id="btnNext1">Siguiente →</button></div>
+          </div>
+
+          <!-- PASO 2 -->
+          <div class="wstep" data-pane="2" hidden>
+            <div class="drop" id="dropZone">
+              <p class="drop-title"><strong>Toma foto o sube el PDF del documento *</strong></p>
+              <p class="muted">PDF, JPG o PNG · máx. 10 MB — archivo obligatorio</p>
+              <div class="file-btns">
+                <button type="button" class="btn btn-ghost" id="btnFoto">📷 Tomar foto</button>
+                <button type="button" class="btn btn-ghost" id="btnPdf">⬆ Seleccionar archivo</button>
+              </div>
+              <input type="file" id="regFoto" accept="image/*" capture="environment" hidden />
+              <input type="file" id="regArchivo" name="archivo" accept=".pdf,.jpg,.jpeg,.png" hidden />
+              <div id="filePreview"></div>
+              <p class="file-name" id="fileName">Ningún archivo seleccionado</p>
+            </div>
+            <div class="wbetween">
+              <button type="button" class="btn btn-ghost" id="btnBack2">← Atrás</button>
+              <button type="button" class="btn btn-primary" id="btnNext2">Revisar y confirmar →</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- PASO 3: verificación (resumen editable) -->
+        <div class="wstep review-card" data-pane="3" hidden>
+          <p class="vc-kicker">✦ Verificación</p>
+          <h2 class="review-title">Revisa los datos antes de guardar</h2>
+          <p class="muted review-lead">Comprueba que todo esté correcto. Si algo no coincide, vuelve a editar; si está bien, confirma para registrar.</p>
+          <dl class="vsum review-sum">
+            <div><dt>No. de Oficio</dt><dd id="rvFolio">—</dd></div>
+            <div><dt>Fecha</dt><dd id="rvFecha">—</dd></div>
+            <div><dt>Asunto</dt><dd id="rvAsunto" class="wrap-any">—</dd></div>
+            <div><dt>Remitente</dt><dd id="rvRemitente">—</dd></div>
+            <div><dt>Destinatario</dt><dd id="rvDestinatario">—</dd></div>
+            <div><dt>Estatus</dt><dd id="rvEstatus">—</dd></div>
+            <div><dt>Archivo digitalizado</dt><dd id="rvArchivo" class="wrap-any">—</dd></div>
+          </dl>
+          <div id="rvPreview" class="rv-preview"></div>
+          <div class="vc-foot">
+            <button type="button" class="btn btn-ghost" id="btnEdit1">← Editar datos</button>
+            <button type="button" class="btn btn-primary" id="btnConfirmar">Confirmar y guardar →</button>
+          </div>
+        </div>
+
+        <!-- PASO 4: confirmación (resultado en servidor) -->
+        <div class="wstep verify-card" data-pane="4" hidden>
+          <span class="vcheck" id="v3Check">✓</span>
+          <p class="vc-kicker">✦ Confirmación</p>
+          <h2 id="v3Title">¡Registro exitoso!</h2>
+          <p class="muted" id="v3Msg">El documento se guardó y su archivo fue verificado en el servidor.</p>
+          <dl class="vsum">
+            <div><dt>Folio</dt><dd id="v3Folio">—</dd></div>
+            <div><dt>Asunto</dt><dd id="v3Asunto">—</dd></div>
+            <div><dt>Remitente → Destinatario</dt><dd id="v3Partes">—</dd></div>
+            <div><dt>Archivo</dt><dd id="v3File">—</dd></div>
+          </dl>
+          <p class="vc-hint"><kbd>ESC</kbd> Volver al listado en cualquier momento</p>
+          <div class="vc-foot">
+            <a class="btn btn-ghost" id="v3Ver" href="#" target="_blank" rel="noopener">Ver documento</a>
+            <button type="button" class="btn btn-primary" data-view-go="documentos">Ir al listado →</button>
+            <button type="button" class="btn btn-ghost" id="btnOtro">Registrar otro</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL VISOR -->
+<div class="modal" id="modalVisor" hidden>
+  <div class="modal-card wide" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="visorTitle">Ver documento</h2>
+      <button class="icon-btn" data-close="modalVisor" aria-label="Cerrar">✕</button>
+    </div>
+    <iframe id="visorFrame" title="Visor PDF" hidden></iframe>
+    <img id="visorImg" alt="Documento digitalizado" hidden />
+    <div class="modal-foot">
+      <a class="btn btn-ghost block" id="visorDescargar" href="#" download>Descargar</a>
+      <button class="btn btn-primary block" data-close="modalVisor">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js?v=20261018i"></script>
+</body>
+</html>

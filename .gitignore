@@ -1,0 +1,14 @@
+# Subidas de usuarios (no se versionan; solo se conserva la estructura)
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep
+
+# Dependencias / OS / editores
+node_modules/
+vendor/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.idea/
+.vscode/

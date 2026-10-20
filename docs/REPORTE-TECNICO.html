@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Reporte Técnico — Gestión de Documentos UNACH</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1e1e2b; font-size: 11.5pt; line-height: 1.55; margin: 0;
+  }
+  h1, h2, h3 { letter-spacing: -.01em; margin: 0; }
+  .cover { text-align: center; padding-top: 60mm; page-break-after: always; }
+  .cover .shield {
+    display: inline-block; background: #1e2a63; color: #fff; font-weight: 800;
+    padding: 14px 22px; border-radius: 12px; letter-spacing: .06em; font-size: 20pt;
+  }
+  .cover h1 { font-size: 26pt; margin: 26px 0 8px; color: #1e1e2b; }
+  .cover .sub { font-size: 14pt; color: #4e4eff; font-weight: 700; }
+  .cover .meta { margin-top: 46px; font-size: 12pt; color: #55556b; line-height: 2; }
+  .cover .meta strong { color: #1e1e2b; }
+  .cover .line { width: 90px; height: 4px; background: #4e4eff; margin: 22px auto; border-radius: 4px; }
+  h2 {
+    font-size: 15pt; color: #1e2a63; margin: 22px 0 10px;
+    border-bottom: 3px solid #ece9ff; padding-bottom: 6px;
+  }
+  h2:first-of-type { margin-top: 0; }
+  p { margin: 0 0 10px; text-align: justify; }
+  code { background: #f0edf7; padding: 1px 5px; border-radius: 4px; font-size: 10.5pt; color: #3d3de6; }
+  ul { margin: 0 0 10px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 10.5pt; }
+  th { background: #1e2a63; color: #fff; text-align: left; padding: 8px 10px; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e7e4ef; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaff; }
+  .badge-ok { color: #15803d; font-weight: 700; }
+  .lead { background: #f6f5ff; border-left: 4px solid #4e4eff; padding: 12px 16px; border-radius: 6px; margin: 12px 0; }
+  section { page-break-inside: avoid; }
+  h2 + p, h2 + ul, h2 + table { page-break-before: avoid; }
+  .flow { font-weight: 700; color: #3d3de6; }
+  footer { margin-top: 30px; border-top: 1px solid #e7e4ef; padding-top: 10px; font-size: 9.5pt; color: #83839a; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <span class="shield">UNACH</span>
+  <h1>Reporte Técnico</h1>
+  <div class="sub">Sistema de Gestión de Documentos de Oficina</div>
+  <div class="line"></div>
+  <div class="meta">
+    <div><strong>Alumno:</strong> Jose Matias Dominguez Rodas — 7mo A</div>
+    <div><strong>Profesor:</strong> Mtro. Christian Mauricio Castillo Estrada</div>
+    <div><strong>Asignatura:</strong> Desarrollo de aplicaciones web y móviles</div>
+    <div><strong>Campus:</strong> ETDA Campus IV — Tapachula, Chiapas</div>
+    <div><strong>Fecha de entrega:</strong> 16 de octubre de 2026</div>
+  </div>
+</div>
+
+<section>
+<h2>1. Problema y solución</h2>
+<p>La oficina de la ETDA gestionaba sus oficios, circulares y solicitudes en papel: los documentos se traspapelaban, se archivaban mal y localizar uno por folio, asunto, remitente o fecha tomaba demasiado tiempo. Además, no existía evidencia digital ni un control claro del estado del trámite de cada oficio.</p>
+<p>Se construyó una <strong>plataforma web responsiva</strong> (funciona igual en celular, tablet y computadora) que permite: <strong>recibir</strong> el documento, <strong>digitalizarlo</strong> (tomando foto con la cámara o subiendo un PDF), <strong>registrarlo</strong> con sus datos administrativos (No. de oficio, fecha, asunto, remitente, destinatario, estatus), <strong>consultarlo</strong> en un listado completo con búsqueda y filtros, <strong>actualizar su estatus</strong> de trámite y <strong>ver/descargar</strong> el archivo digital.</p>
+<div class="lead">Flujo mínimo exigido, garantizado de punta a punta: <span class="flow">recibir → digitalizar → registrar → buscar → actualizar estatus → consultar PDF</span>.</div>
+</section>
+
+<section>
+<h2>2. Arquitectura</h2>
+<p><strong>Frontend</strong> (<code>index.html</code>, <code>styles.css</code>, <code>app.js</code>): HTML5 + CSS3 + jQuery 3.7, con enfoque <em>mobile-first</em>. La interfaz se compone de un <em>shell</em> adaptable:</p>
+<ul>
+  <li><strong>Móvil (&lt;700px):</strong> barra superior, navegación inferior tipo app con botón flotante de alta, y documentos en formato tarjeta.</li>
+  <li><strong>Tablet (≥700px):</strong> tabla de documentos.</li>
+  <li><strong>Escritorio (≥960px):</strong> dos columnas (menú lateral fijo + contenido), sin barra superior ni inferior.</li>
+</ul>
+<p>Vistas: <strong>Inicio</strong> (hero con conteos en vivo y accesos recientes) y <strong>Documentos</strong> (listado con búsqueda y filtros). La captura/alta se realiza en un <strong>asistente de 3 pasos</strong> (Datos → Archivo → Verificación) a pantalla completa. Las peticiones al servidor usan <code>$.ajax</code> / <code>$.getJSON</code>.</p>
+
+<p><strong>Backend</strong> (PHP 8 puro, carpeta <code>api/</code>): 6 endpoints más una configuración central:</p>
+<table>
+  <thead><tr><th>Endpoint</th><th>Método</th><th>Función</th></tr></thead>
+  <tbody>
+    <tr><td><code>listar.php</code></td><td>GET</td><td>Lista con filtros (texto, estatus, rango de fechas) y devuelve conteos</td></tr>
+    <tr><td><code>registrar.php</code></td><td>POST (multipart)</td><td>Valida, sube el archivo e inserta el documento</td></tr>
+    <tr><td><code>ver.php?id=</code></td><td>GET</td><td>Sirve el archivo <em>inline</em> (PDF en &lt;iframe&gt;, foto en &lt;img&gt;)</td></tr>
+    <tr><td><code>descargar.php?id=</code></td><td>GET</td><td>Fuerza la descarga (<code>Content-Disposition: attachment</code>)</td></tr>
+    <tr><td><code>estatus.php</code></td><td>POST (JSON)</td><td>Actualiza el estatus (Recibido / En proceso / Atendido)</td></tr>
+    <tr><td><code>eliminar.php</code></td><td>POST (JSON)</td><td>Borra el registro <strong>y</strong> su archivo físico</td></tr>
+  </tbody>
+</table>
+<p><code>config.php</code> centraliza la conexión <strong>PDO</strong> y las constantes del dominio (límite 10 MB, MIME permitidos, estatus válidos). Las credenciales pueden sobrescribirse por variables de entorno (<code>getenv</code>), lo que permite el mismo código en local y en el hosting.</p>
+
+<p><strong>Base de datos</strong> (<code>sql/db.sql</code>): MySQL/MariaDB, base <code>gestion_docs</code>, tabla <code>documentos</code>:</p>
+<p><code>id_documento</code> INT PK autoincremental · <code>no_oficio</code> VARCHAR(30) UNIQUE · <code>fecha</code> DATE · <code>asunto</code> VARCHAR(255) · <code>remitente</code> y <code>destinatario</code> VARCHAR(150) · <code>estatus</code> ENUM('Recibido','En proceso','Atendido') DEFAULT 'Recibido' · <code>archivo_pdf</code> VARCHAR(255) · <code>creado_en</code> TIMESTAMP. Con índices en folio, fecha y estatus, más un índice FULLTEXT para búsqueda.</p>
+
+<p><strong>Archivos:</strong> se guardan en <code>uploads/</code> con nombre seguro <code>AAAAMMDD_folio_hash.ext</code> (evita colisiones y caracteres peligrosos). Un <code>.htaccess</code> <strong>bloquea la ejecución de scripts</strong> dentro de la carpeta.</p>
+
+<p><strong>Seguridad:</strong> validación doble (cliente + servidor), detección de tipo MIME real con <code>finfo</code>, límite de tamaño, sentencias preparadas en todas las consultas (anti SQL-Injection), <code>realpath</code> para evitar <em>path traversal</em> en ver/descargar/eliminar, y escape en el render (anti XSS).</p>
+
+<p><strong>Despliegue dual:</strong> XAMPP en local para desarrollo/demostración, e <strong>InfinityFree</strong> (PHP + MySQL gratuito) para la URL pública; GitHub como repositorio de código.</p>
+</section>
+
+<section>
+<h2>3. Funcionalidades</h2>
+<ul>
+  <li><strong>Registrar (asistente 3 pasos):</strong> paso 1 datos con validación en línea (obligatorios, máximo de caracteres, fecha no futura); paso 2 archivo con <strong>vista previa</strong> (miniatura para fotos, ficha con nombre y tamaño para PDF) y botones <em>Tomar foto</em> (abre la cámara del móvil) y <em>Seleccionar PDF</em>; paso 3 <strong>verificación</strong>, donde el sistema confirma contra el servidor que el registro y el archivo quedaron guardados y muestra el mensaje de éxito con un resumen.</li>
+  <li><strong>Listado:</strong> muestra <strong>todos</strong> los documentos por defecto, con búsqueda por folio/asunto/remitente/destinatario (<em>debounce</em> de 350 ms) y filtros por estatus y rango de fechas.</li>
+  <li><strong>Estatus:</strong> cambio por fila mediante selector; los conteos del Inicio se actualizan desde el servidor.</li>
+  <li><strong>Ver / Descargar:</strong> visor embebido (sin salir de la plataforma) y descarga con nombre basado en el folio.</li>
+  <li><strong>Eliminar:</strong> con confirmación; borra la fila y el archivo físico.</li>
+  <li><strong>Regla de dominio:</strong> folio único (duplicados → <strong>409</strong>); sin archivo no hay registro.</li>
+</ul>
+<p><strong>Casos borde cubiertos:</strong> sin resultados muestra mensaje; sin archivo indica "Sin archivo"; fecha futura y archivo mayor a 10 MB o de tipo no permitido se rechazan con mensaje claro.</p>
+</section>
+
+<section>
+<h2>4. Pruebas</h2>
+<table>
+  <thead><tr><th>#</th><th>Caso</th><th>Resultado esperado</th><th>Estado</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Registrar 001/2026 + PDF 1.2 MB</td><td>201 y aparece en el listado</td><td class="badge-ok">OK</td></tr>
+    <tr><td>2</td><td>Intentar duplicar el folio</td><td>409 "ya registrado"</td><td class="badge-ok">OK</td></tr>
+    <tr><td>3</td><td>Buscar "materiales" / filtrar Recibido / rango oct-2026</td><td>Solo coincidencias</td><td class="badge-ok">OK</td></tr>
+    <tr><td>4</td><td>Cambiar estatus a "Atendido"</td><td>Badge y conteos actualizados</td><td class="badge-ok">OK</td></tr>
+    <tr><td>5</td><td>Ver PDF en el visor / descargar</td><td>Inline / descarga</td><td class="badge-ok">OK</td></tr>
+    <tr><td>6</td><td>Subir .exe o archivo de 25 MB</td><td>Rechazo con mensaje (400)</td><td class="badge-ok">OK</td></tr>
+    <tr><td>7</td><td>Eliminar un documento</td><td>Borra fila + archivo físico</td><td class="badge-ok">OK</td></tr>
+    <tr><td>8</td><td>Registrar desde el celular (foto)</td><td>Sube la foto y verifica</td><td class="badge-ok">OK</td></tr>
+    <tr><td>9</td><td>Móvil 360px / tablet 768px / desktop 1280px</td><td>Sin scroll horizontal</td><td class="badge-ok">OK</td></tr>
+  </tbody>
+</table>
+<p><strong>Evidencias sugeridas:</strong> capturas de Inicio, listado con filtros, los 3 pasos del asistente (incluida la pantalla de éxito), visor del PDF, phpMyAdmin con la tabla, y un video corto del flujo completo.</p>
+</section>
+
+<section>
+<h2>5. Conclusiones</h2>
+<p>Se cumple el 100% de los requerimientos funcionales y técnicos con el stack exigido (HTML5, CSS3, jQuery, PHP, MySQL) y buenas prácticas de desarrollo seguro (prepared statements, validación doble, control de tipo y tamaño de archivos, credenciales fuera del código). La interfaz es completamente responsiva y mobile-first, e incluye digitalización desde cámara y verificación de la subida.</p>
+<p><strong>Limitaciones:</strong> no incluye autenticación/roles ni módulo de reportes (fuera del alcance acordado); en el hosting gratuito la carpeta <code>uploads/</code> es accesible públicamente (mitigado con renombrado y bloqueo de ejecución).</p>
+<p><strong>Trabajo futuro:</strong> inicio de sesión con roles, paginación del lado del servidor, conversión de foto a PDF con OCR, bitácora de cambios de estatus y respaldo automático de la base de datos.</p>
+<p><strong>Instalación rápida:</strong> local → XAMPP, importar <code>sql/db.sql</code>, abrir <code>http://localhost/laboratorio2/</code>; público → InfinityFree, importar el SQL, subir los archivos y editar <code>api/config.php</code>.</p>
+</section>
+
+<footer>Sistema de Gestión de Documentos · UNACH ETDA Campus IV · Jose Matias Dominguez Rodas</footer>
+
+</body>
+</html>
